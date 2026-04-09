@@ -1,0 +1,150 @@
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --accent-color: #4CAF50;
+    --graph-bg: #2d2d2d;
+    --node-color: #64b5f6;
+    --edge-color: #90caf9;
+    --hover-color: #81c784;
+    --highlight-color: #ffeb3b;
+    --selected-color: #ff9800;
+    /* Orange for selection */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#game-container {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+}
+
+#stats {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#instructions {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+#options-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.graph-canvas {
+    background-color: var(--graph-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    width: 250px;
+    height: 250px;
+    border: 3px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
+    /* Context for absolute positioning if needed */
+}
+
+#options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    width: 100%;
+    justify-items: center;
+}
+
+.option-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.option-wrapper:hover .graph-canvas {
+    border-color: var(--hover-color);
+    transform: scale(1.02);
+}
+
+.option-wrapper.selected .graph-canvas {
+    border-color: var(--selected-color);
+    box-shadow: 0 0 10px var(--selected-color);
+}
+
+/* Success/Fail animations */
+.correct {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-color) !important;
+}
+
+.wrong {
+    border-color: #f44336 !important;
+    box-shadow: 0 0 15px #f44336 !important;
+}
+
+.missed {
+    border-color: #2196F3 !important;
+    /* Blue for missed correct ones */
+    border-style: dashed !important;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    height: 60px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+#message {
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-height: 1.5em;
+}

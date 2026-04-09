@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isomorphism Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Isomorphism Groups</h1>
+            <div id="stats">
+                <span>Score: <span id="score">0</span></span>
+                <span>Level: <span id="level">1</span></span>
+            </div>
+            <button id="submit-btn">Submit Selection</button>
+        </header>
+
+        <main>
+            <div id="instructions">
+                <p>Find all graphs that are isomorphic (structurally identical) to at least one other graph. Select them
+                    and click Submit.</p>
+            </div>
+            <div id="options-container">
+                <div id="options-grid">
+                    <!-- Options will be generated here -->
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <button id="next-level-btn" style="display: none;">Next Level</button>
+            <div id="message"></div>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
