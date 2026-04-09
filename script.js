@@ -219,8 +219,6 @@ function startLevel() {
         wrapper.className = 'option-wrapper';
         wrapper.id = `option-${index}`;
         wrapper.onclick = () => toggleSelection(index);
-        wrapper.style.setProperty('--offset-y', `${randomInRange(-8, 10).toFixed(0)}px`);
-        wrapper.style.setProperty('--offset-x', `${randomInRange(-10, 10).toFixed(0)}px`);
 
         const canvasDiv = document.createElement('div');
         canvasDiv.className = 'graph-canvas';
