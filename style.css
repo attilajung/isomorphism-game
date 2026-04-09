@@ -78,12 +78,14 @@ main {
     gap: 20px;
     width: 100%;
     justify-items: center;
+    align-items: start;
 }
 
 .option-wrapper {
     cursor: pointer;
     transition: transform 0.2s;
     position: relative;
+    transform: translate(var(--offset-x, 0), var(--offset-y, 0)) rotate(var(--tilt, 0deg));
 }
 
 .option-wrapper:hover .graph-canvas {
@@ -147,4 +149,10 @@ button:disabled {
     font-size: 1.2rem;
     font-weight: bold;
     min-height: 1.5em;
+}
+
+@media (max-width: 700px) {
+    .option-wrapper {
+        transform: none;
+    }
 }

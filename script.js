@@ -91,19 +91,10 @@ function areIsomorphic(g1, g2) {
 
 // Game State
 let currentLevel = 1;
-let score = 0;
-let graphs = []; // Array of {id, graph, isIsomorph} objects, though isIsomorph is relative
-let targetGroupId = -1; // We can designate one group as the target, OR
-// Better: "Find all graphs that form the largest isomorphic group" or just "Find the pair"
-// Spec: "Select isomorphic pairs/triples".
-// Let's implement: "There is ONE group of K isomorphic graphs. Select them all."
-// And distractors are unique or form smaller groups. 
-// To keep it simple: "Find the 2 (or 3) graphs that are isomorphic to each other."
-
+let graphs = [];
 let correctIndices = [];
 
 function initGame() {
-    score = 0;
     currentLevel = 1;
     updateStats();
     startLevel();
@@ -117,8 +108,16 @@ function initGame() {
 }
 
 function updateStats() {
-    document.getElementById('score').innerText = score;
     document.getElementById('level').innerText = currentLevel;
+}
+
+function updateInstructions(groupSize) {
+    document.getElementById('instructions-text').innerText =
+        `Each round has exactly one isomorphism class with more than one graph. Find the one matching group of ${groupSize} graphs and select all of them.`;
+}
+
+function randomInRange(min, max) {
+    return min + Math.random() * (max - min);
 }
 
 function generateRandomGraph(n, p) {
@@ -156,6 +155,8 @@ function startLevel() {
     if (currentLevel >= 3) { groupSize = 3; totalGraphs = 6; }
     if (currentLevel >= 6) { groupSize = 3; totalGraphs = 8; }
 
+    updateInstructions(groupSize);
+
     // 1. Generate Base Graph for the Target Group
     let baseGraph = generateRandomGraph(numVertices, edgeProb);
     // Ensure it's not empty or full for interest
@@ -180,7 +181,6 @@ function startLevel() {
 
     // Add Distractors
     // Distractors must NOT be isomorphic to the Base Graph AND preferably not to each other (unique)
-    let distractorsAdded = 0;
     let safeguard = 0;
     while (gameGraphs.length < totalGraphs && safeguard < 100) {
         safeguard++;
@@ -219,6 +219,9 @@ function startLevel() {
         wrapper.className = 'option-wrapper';
         wrapper.id = `option-${index}`;
         wrapper.onclick = () => toggleSelection(index);
+        wrapper.style.setProperty('--tilt', `${randomInRange(-3.5, 3.5).toFixed(2)}deg`);
+        wrapper.style.setProperty('--offset-y', `${randomInRange(-8, 10).toFixed(0)}px`);
+        wrapper.style.setProperty('--offset-x', `${randomInRange(-10, 10).toFixed(0)}px`);
 
         const canvasDiv = document.createElement('div');
         canvasDiv.className = 'graph-canvas';
@@ -260,16 +263,14 @@ function submitSelection() {
     const isCorrect = JSON.stringify(selectedArray) === JSON.stringify(correctArray);
 
     if (isCorrect) {
-        score += 15;
-        document.getElementById('message').innerText = "Correct! You found the isomorphic group.";
+        document.getElementById('message').innerText = "Correct! You found the one matching isomorphism class.";
         document.getElementById('message').style.color = "var(--accent-color)";
         // Highlight all correct
         selectedArray.forEach(idx => {
             document.getElementById(`option-${idx}`).querySelector('.graph-canvas').classList.add('correct');
         });
     } else {
-        score = Math.max(0, score - 5);
-        document.getElementById('message').innerText = "Incorrect. See the solution below.";
+        document.getElementById('message').innerText = "Incorrect. The matching group is now highlighted.";
         document.getElementById('message').style.color = "#f44336";
 
         // Show missed and wrong
@@ -291,7 +292,6 @@ function submitSelection() {
         });
     }
 
-    updateStats();
     document.getElementById('next-level-btn').style.display = "block";
     selectedIndices.clear();
 }
@@ -312,10 +312,21 @@ function renderGraph(graph, selector, width, height) {
         }
     }
 
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const initialRadius = Math.min(width, height) * randomInRange(0.18, 0.28);
+    const initialAngleOffset = randomInRange(0, Math.PI * 2);
+
+    nodes.forEach((node, index) => {
+        const angle = initialAngleOffset + ((Math.PI * 2) / nodes.length) * index;
+        node.x = centerX + Math.cos(angle) * initialRadius + randomInRange(-18, 18);
+        node.y = centerY + Math.sin(angle) * initialRadius + randomInRange(-18, 18);
+    });
+
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(40))
-        .force("charge", d3.forceManyBody().strength(-150))
-        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("link", d3.forceLink(links).id(d => d.id).distance(randomInRange(34, 52)))
+        .force("charge", d3.forceManyBody().strength(randomInRange(-180, -120)))
+        .force("center", d3.forceCenter(centerX, centerY))
         // Add collision to prevent overlap
         .force("collide", d3.forceCollide().radius(10));
 
@@ -339,10 +350,33 @@ function renderGraph(graph, selector, width, height) {
 
     // Optional: Add drag behavior? Keep it for fun
 
-    const margin = 10;
+    const margin = 18;
 
-    simulation.on("tick", () => {
-        // Constrain nodes to be within the box
+    simulation.alpha(1);
+    for (let i = 0; i < 220; i++) {
+        simulation.tick();
+    }
+    simulation.stop();
+
+    const rotation = randomInRange(0, Math.PI * 2);
+    const shouldMirrorX = Math.random() < 0.5;
+    const shouldMirrorY = Math.random() < 0.5;
+
+    nodes.forEach(d => {
+        let dx = d.x - centerX;
+        let dy = d.y - centerY;
+
+        const rotatedX = dx * Math.cos(rotation) - dy * Math.sin(rotation);
+        const rotatedY = dx * Math.sin(rotation) + dy * Math.cos(rotation);
+
+        dx = shouldMirrorX ? -rotatedX : rotatedX;
+        dy = shouldMirrorY ? -rotatedY : rotatedY;
+
+        d.x = Math.max(margin, Math.min(width - margin, centerX + dx));
+        d.y = Math.max(margin, Math.min(height - margin, centerY + dy));
+    });
+
+    function updatePositions() {
         nodes.forEach(d => {
             d.x = Math.max(margin, Math.min(width - margin, d.x));
             d.y = Math.max(margin, Math.min(height - margin, d.y));
@@ -357,6 +391,12 @@ function renderGraph(graph, selector, width, height) {
         node
             .attr("cx", d => d.x)
             .attr("cy", d => d.y);
+    }
+
+    updatePositions();
+    simulation.on("tick", () => {
+        // Constrain nodes to be within the box
+        updatePositions();
     });
 }
 

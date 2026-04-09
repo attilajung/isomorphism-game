@@ -1,34 +1,16 @@
-# 🎮 Isomorphism Finder
+# 🎮 [Play the Isomorphism Game](https://attilajung.github.io/isomorphism-game/)
 
-A fun interactive game to learn about graph isomorphism! Challenge yourself to find all graphs that are structurally identical.
+A fun browser-based puzzle where you spot the one group of graphs that are structurally identical. Each round contains exactly one matching isomorphism class, and your job is to find every graph in that class.
 
-## 🎯 How to Play
+## What's Included
 
-1. Look at the graphs displayed on your screen
-2. Find all graphs that are **isomorphic** (structurally identical) to at least one other graph
-3. Select the matching graphs
-4. Click "Submit Selection" to check your answer
-5. Advance through levels and rack up points!
+- **Click to select**: Pick the graphs you believe belong to the same isomorphism class
+- **Clear round goal**: Each level has exactly one matching group to find
+- **Immediate feedback**: Correct and incorrect selections are highlighted after you submit
+- **Progressive difficulty**: Later rounds increase the number of graphs and matching targets
+- **Randomized layouts**: Graph drawings and card positions vary from round to round
+- No setup required, just open it in your browser
 
-## 🧠 What is Isomorphism?
+## Tech
 
-Two graphs are isomorphic if they have the same structure, even if they look different visually. Think of it like finding puzzle pieces that fit the same pattern—the layouts might be different, but the connections are the same!
-
-## 🚀 Getting Started
-
-Simply open `index.html` in your web browser and start playing!
-
-## 🛠️ Built With
-
-- **HTML/CSS** for the interface
-- **JavaScript** for the game logic
-- **D3.js** for graph visualization
-
-## 📝 Features
-
-- Progressive difficulty levels
-- Score tracking
-- Visual graph rendering
-- Immediate feedback on your selections
-
-Enjoy and happy graphing! 🎲
+Built with vanilla HTML, CSS, and JavaScript. Uses D3.js force-directed layouts to render the graphs and a brute-force isomorphism check for small graph sizes.
