@@ -93,6 +93,7 @@ function areIsomorphic(g1, g2) {
 let currentLevel = 1;
 let graphs = [];
 let correctIndices = [];
+let canAdvanceLevel = false;
 
 function initGame() {
     currentLevel = 1;
@@ -101,7 +102,11 @@ function initGame() {
 
     document.getElementById('submit-btn').onclick = submitSelection;
     document.getElementById('next-level-btn').onclick = () => {
-        currentLevel++;
+        if (canAdvanceLevel) {
+            currentLevel++;
+        }
+
+        canAdvanceLevel = false;
         updateStats();
         startLevel();
     };
@@ -113,7 +118,7 @@ function updateStats() {
 
 function updateInstructions() {
     document.getElementById('instructions-text').innerText =
-        "Find the matching group.";
+        "Find the matching graphs.";
 }
 
 function randomInRange(min, max) {
@@ -133,8 +138,10 @@ function generateRandomGraph(n, p) {
 }
 
 function startLevel() {
+    canAdvanceLevel = false;
     document.getElementById('message').innerText = "";
     document.getElementById('next-level-btn').style.display = "none";
+    document.getElementById('next-level-btn').innerText = "Next Level";
     document.getElementById('submit-btn').disabled = false;
 
     const layoutContainer = document.getElementById('options-grid');
@@ -147,13 +154,16 @@ function startLevel() {
     // We want to generate a set of K isomorphic graphs and M distractors.
     // Level 1-2: Find 2 isomorphic, 2 distractors (Total 4)
     // Level 3-5: Find 3 isomorphic, 3 distractors (Total 6)
-    // Level 6+: Find 3 isomorphic, 5 distractors (Total 8)
+    // Level 6+: Find 2, 3, or 4 isomorphic graphs at random (Total 8)
 
     let groupSize = 2;
     let totalGraphs = 4;
 
     if (currentLevel >= 3) { groupSize = 3; totalGraphs = 6; }
-    if (currentLevel >= 6) { groupSize = 3; totalGraphs = 8; }
+    if (currentLevel >= 6) {
+        groupSize = 2 + Math.floor(Math.random() * 3);
+        totalGraphs = 8;
+    }
 
     updateInstructions();
 
@@ -260,15 +270,19 @@ function submitSelection() {
     const isCorrect = JSON.stringify(selectedArray) === JSON.stringify(correctArray);
 
     if (isCorrect) {
+        canAdvanceLevel = true;
         document.getElementById('message').innerText = "Correct! You found the one matching isomorphism class.";
         document.getElementById('message').style.color = "var(--accent-color)";
+        document.getElementById('next-level-btn').innerText = "Next Level";
         // Highlight all correct
         selectedArray.forEach(idx => {
             document.getElementById(`option-${idx}`).querySelector('.graph-canvas').classList.add('correct');
         });
     } else {
+        canAdvanceLevel = false;
         document.getElementById('message').innerText = "Incorrect. The matching group is now highlighted.";
         document.getElementById('message').style.color = "#f44336";
+        document.getElementById('next-level-btn').innerText = "Repeat Level";
 
         // Show missed and wrong
         selectedArray.forEach(idx => {

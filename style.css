@@ -49,6 +49,11 @@ h1 {
     font-weight: bold;
 }
 
+#controls {
+    display: flex;
+    align-items: center;
+}
+
 main {
     display: flex;
     flex-direction: column;
