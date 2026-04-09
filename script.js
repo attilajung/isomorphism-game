@@ -111,9 +111,9 @@ function updateStats() {
     document.getElementById('level').innerText = currentLevel;
 }
 
-function updateInstructions(groupSize) {
+function updateInstructions() {
     document.getElementById('instructions-text').innerText =
-        `Each round has exactly one isomorphism class with more than one graph. Find the one matching group of ${groupSize} graphs and select all of them.`;
+        "Find the matching group.";
 }
 
 function randomInRange(min, max) {
@@ -155,7 +155,7 @@ function startLevel() {
     if (currentLevel >= 3) { groupSize = 3; totalGraphs = 6; }
     if (currentLevel >= 6) { groupSize = 3; totalGraphs = 8; }
 
-    updateInstructions(groupSize);
+    updateInstructions();
 
     // 1. Generate Base Graph for the Target Group
     let baseGraph = generateRandomGraph(numVertices, edgeProb);
@@ -219,7 +219,6 @@ function startLevel() {
         wrapper.className = 'option-wrapper';
         wrapper.id = `option-${index}`;
         wrapper.onclick = () => toggleSelection(index);
-        wrapper.style.setProperty('--tilt', `${randomInRange(-3.5, 3.5).toFixed(2)}deg`);
         wrapper.style.setProperty('--offset-y', `${randomInRange(-8, 10).toFixed(0)}px`);
         wrapper.style.setProperty('--offset-x', `${randomInRange(-10, 10).toFixed(0)}px`);
 
@@ -314,21 +313,27 @@ function renderGraph(graph, selector, width, height) {
 
     const centerX = width / 2;
     const centerY = height / 2;
-    const initialRadius = Math.min(width, height) * randomInRange(0.18, 0.28);
-    const initialAngleOffset = randomInRange(0, Math.PI * 2);
+    const radius = Math.min(width, height) * randomInRange(0.24, 0.31);
+    const angleOffset = randomInRange(0, Math.PI * 2);
+    const rotation = randomInRange(0, Math.PI * 2);
+    const mirrorX = Math.random() < 0.5 ? -1 : 1;
+    const mirrorY = Math.random() < 0.5 ? -1 : 1;
+    const margin = 22;
 
     nodes.forEach((node, index) => {
-        const angle = initialAngleOffset + ((Math.PI * 2) / nodes.length) * index;
-        node.x = centerX + Math.cos(angle) * initialRadius + randomInRange(-18, 18);
-        node.y = centerY + Math.sin(angle) * initialRadius + randomInRange(-18, 18);
-    });
+        const angle = angleOffset + ((Math.PI * 2) / nodes.length) * index;
+        let x = Math.cos(angle) * radius + randomInRange(-14, 14);
+        let y = Math.sin(angle) * radius + randomInRange(-14, 14);
 
-    const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(randomInRange(34, 52)))
-        .force("charge", d3.forceManyBody().strength(randomInRange(-180, -120)))
-        .force("center", d3.forceCenter(centerX, centerY))
-        // Add collision to prevent overlap
-        .force("collide", d3.forceCollide().radius(10));
+        const rotatedX = x * Math.cos(rotation) - y * Math.sin(rotation);
+        const rotatedY = x * Math.sin(rotation) + y * Math.cos(rotation);
+
+        x = rotatedX * mirrorX;
+        y = rotatedY * mirrorY;
+
+        node.x = Math.max(margin, Math.min(width - margin, centerX + x));
+        node.y = Math.max(margin, Math.min(height - margin, centerY + y));
+    });
 
     const link = svg.append("g")
         .attr("stroke", "#999")
@@ -345,83 +350,17 @@ function renderGraph(graph, selector, width, height) {
         .data(nodes)
         .join("circle")
         .attr("r", 6)
-        .attr("fill", "#64b5f6")
-        .call(drag(simulation));
+        .attr("fill", "#64b5f6");
 
-    // Optional: Add drag behavior? Keep it for fun
+    link
+        .attr("x1", d => nodes[d.source].x)
+        .attr("y1", d => nodes[d.source].y)
+        .attr("x2", d => nodes[d.target].x)
+        .attr("y2", d => nodes[d.target].y);
 
-    const margin = 18;
-
-    simulation.alpha(1);
-    for (let i = 0; i < 220; i++) {
-        simulation.tick();
-    }
-    simulation.stop();
-
-    const rotation = randomInRange(0, Math.PI * 2);
-    const shouldMirrorX = Math.random() < 0.5;
-    const shouldMirrorY = Math.random() < 0.5;
-
-    nodes.forEach(d => {
-        let dx = d.x - centerX;
-        let dy = d.y - centerY;
-
-        const rotatedX = dx * Math.cos(rotation) - dy * Math.sin(rotation);
-        const rotatedY = dx * Math.sin(rotation) + dy * Math.cos(rotation);
-
-        dx = shouldMirrorX ? -rotatedX : rotatedX;
-        dy = shouldMirrorY ? -rotatedY : rotatedY;
-
-        d.x = Math.max(margin, Math.min(width - margin, centerX + dx));
-        d.y = Math.max(margin, Math.min(height - margin, centerY + dy));
-    });
-
-    function updatePositions() {
-        nodes.forEach(d => {
-            d.x = Math.max(margin, Math.min(width - margin, d.x));
-            d.y = Math.max(margin, Math.min(height - margin, d.y));
-        });
-
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-        node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-    }
-
-    updatePositions();
-    simulation.on("tick", () => {
-        // Constrain nodes to be within the box
-        updatePositions();
-    });
-}
-
-function drag(simulation) {
-    function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        event.subject.fx = event.subject.x;
-        event.subject.fy = event.subject.y;
-    }
-
-    function dragged(event) {
-        event.subject.fx = event.x;
-        event.subject.fy = event.y;
-    }
-
-    function dragended(event) {
-        if (!event.active) simulation.alphaTarget(0);
-        event.subject.fx = null;
-        event.subject.fy = null;
-    }
-
-    return d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended);
+    node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
 }
 
 // Start game

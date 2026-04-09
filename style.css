@@ -33,8 +33,15 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
     border-bottom: 2px solid var(--accent-color);
     padding-bottom: 10px;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 3vw, 2.4rem);
 }
 
 #stats {
@@ -52,6 +59,7 @@ main {
     text-align: center;
     font-size: 1.1rem;
     color: #ccc;
+    padding: 0 12px;
 }
 
 #options-container {
@@ -85,7 +93,7 @@ main {
     cursor: pointer;
     transition: transform 0.2s;
     position: relative;
-    transform: translate(var(--offset-x, 0), var(--offset-y, 0)) rotate(var(--tilt, 0deg));
+    transform: translate(var(--offset-x, 0), var(--offset-y, 0));
 }
 
 .option-wrapper:hover .graph-canvas {
@@ -149,10 +157,57 @@ button:disabled {
     font-size: 1.2rem;
     font-weight: bold;
     min-height: 1.5em;
+    text-align: center;
 }
 
 @media (max-width: 700px) {
+    body {
+        padding: 12px;
+    }
+
+    #game-container {
+        gap: 16px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    #stats {
+        font-size: 1rem;
+    }
+
+    button {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #options-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
     .option-wrapper {
         transform: none;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .graph-canvas {
+        width: min(100%, 320px);
+        height: min(100vw - 56px, 320px);
+    }
+
+    #instructions {
+        font-size: 1rem;
+        padding: 0;
+    }
+
+    footer {
+        height: auto;
+        margin-top: 8px;
     }
 }
